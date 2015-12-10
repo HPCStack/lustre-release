@@ -60,6 +60,7 @@ IB_OPTIONS?=""
 PATCH_PKG=linux-patch-lustre
 UTILS_PKG=lustre-utils
 TESTS_PKG=lustre-tests
+SERVER_PKG=lustre-server
 DEV_PKG=lustre-dev
 SOURCE_PKG=lustre-source
 MODS_PKG=lustre-client-modules
@@ -78,6 +79,7 @@ ifneq ($(AVAIL_CPUS),1)
 endif
 
 autogen: autogen-stamp
+
 autogen-stamp: patch-stamp
 	# see if any patches requires us to run autogen
 	# (for a distribution release tarball, it is expected that if
@@ -103,6 +105,8 @@ autogen-stamp: patch-stamp
 		cp /usr/share/misc/config.guess ldiskfs/config.guess; \
 		sh build/autogen.sh; \
 	fi; \
+	# added by yshestakov
+	bash autogen.sh
 	touch $@
 
 configure: configure-stamp
@@ -117,11 +121,13 @@ configure-stamp: autogen-stamp debian/control.main debian/control.modules.in
 	fi
 	( cd $(BUILDDIR) && \
 	 $(SRCDIR)/configure --disable-dependency-tracking \
-		   --disable-modules \
 		   --disable-snmp \
+		   --disable-modules \
 		   --disable-client \
 		   --enable-quota \
-		   --disable-server )
+		   --enable-server \
+		   --with-zfs=yes \
+		   )
 	touch $@
 
 build-arch build-indep: build
@@ -146,7 +152,7 @@ build-stamp: patch-stamp configure-stamp
 # instead we will build the modules with m-a in the "make debs" target
 # binary-arch: binary-$(UTILS_PKG) binary-$(TESTS_PKG) binary-$(DEV_PKG) \
 # binary-$(MODS_PKG) binary-kern-mods
-binary-arch: binary-$(UTILS_PKG) binary-$(TESTS_PKG) binary-$(DEV_PKG)
+binary-arch: binary-$(UTILS_PKG) binary-$(TESTS_PKG) binary-$(DEV_PKG) binary-$(SERVER_PKG)
 
 binary-indep: binary-$(PATCH_PKG) binary-$(SOURCE_PKG)
 
@@ -239,6 +245,35 @@ binary-$(DEV_PKG): build-stamp
 	dh_gencontrol -p $(DEV_PKG)
 	dh_md5sums -p $(DEV_PKG)
 	dh_builddeb -p $(DEV_PKG)
+
+binary-$(SERVER_PKG): build-stamp
+	dh_testdir
+	dh_testroot
+	dh_installdirs -p $(SERVER_PKG)
+	dh_installdocs -p  $(SERVER_PKG)
+	dh_installman -p $(SERVER_PKG)
+	dh_install -p $(SERVER_PKG)
+	# Install /etc/init.d/ script
+	mkdir -p $(TOP_DIR)/debian/$(SERVER_PKG)/etc/init.d
+	cp ./lustre/scripts/lustre-debian $(TOP_DIR)/debian/$(SERVER_PKG)/etc/init.d/lustre
+	chmod a+x $(TOP_DIR)/debian/$(SERVER_PKG)/etc/init.d/lustre
+	# Install /etc/ldev.conf
+	cp ./lustre/conf/ldev.conf $(TOP_DIR)/debian/$(SERVER_PKG)/etc/ldev.conf
+	# Install /etc/modprobe.d/lustre.conf
+	mkdir -p $(TOP_DIR)/debian/$(SERVER_PKG)/etc/modprobe.d
+	cp ./lustre/conf/lustre-mod.conf $(TOP_DIR)/debian/$(SERVER_PKG)/etc/modprobe.d/lustre.conf
+	mkdir -p $(TOP_DIR)/debian/$(SERVER_PKG)/usr/share/doc/lustre-server/
+	cp ./lustre/conf/modules.conf $(TOP_DIR)/debian/$(SERVER_PKG)/usr/share/doc/lustre-server/client-modules.conf.example
+	dh_makeshlibs -p $(SERVER_PKG)
+	dh_installexamples -p $(SERVER_PKG)
+	dh_installchangelogs -p $(SERVER_PKG) lustre/ChangeLog
+	dh_compress -p $(SERVER_PKG)
+	dh_strip -p $(SERVER_PKG)
+	dh_installdeb -p $(SERVER_PKG)
+	dh_fixperms -p $(SERVER_PKG)
+	dh_gencontrol -p $(SERVER_PKG)
+	dh_md5sums -p $(SERVER_PKG)
+	dh_builddeb -p $(SERVER_PKG)
 
 binary-$(SOURCE_PKG): build-stamp
 	dh_testdir 
@@ -346,6 +381,7 @@ kdist_config: prep-deb-files patch-stamp
 		    --disable-snmp \
 		    --disable-tests \
 		    --enable-quota \
+		    --with-zfs=yes \
 		    $(IB_OPTIONS)
 
 kdist_configure: kdist_config

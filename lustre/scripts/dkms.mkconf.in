@@ -2,7 +2,11 @@
 
 PROG=$0
 
-pkgcfg=/etc/sysconfig/lustre
+if [ -e /etc/debian_version ] ; then
+  pkgcfg=/etc/default/lustre
+else
+  pkgcfg=/etc/sysconfig/lustre
+fi
 
 while getopts "n:v:c:f:" opt; do
 	case $opt in
@@ -18,11 +22,19 @@ if [ -z "${pkgname}" -o -z "${pkgver}" -o -z "${filename}" ]; then
 	exit 1
 fi
 
-rpm -qa | grep krb5-devel >/dev/null
-if [ $? == 0 ] ; then
-	GSS="--enable-gss"
+if [ -e /etc/debian_version ] ; then
+  # Debian based distro
+  dpkg -l libkrb5-dev >/dev/null
+  have_gss=$?
 else
-	GSS="--disable-gss"
+  # RedHat based distro
+  rpm -qa | grep krb5-devel >/dev/null
+  have_gss=$?
+fi
+if [ $have_gss = 0 ] ; then
+      GSS="--enable-gss"
+else
+      GSS="--disable-gss"
 fi
 
 cat >${filename} <<EOF
@@ -31,10 +43,24 @@ PACKAGE_VERSION="${pkgver}"
 PACKAGE_CONFIG="${pkgcfg}"
 EOF
 if [ $pkgname = "lustre" ] ; then
+     if [ -e /etc/debian_version ] ; then
+	# Debian based distro
+	ZFS_CFG=<<EOF
+  --with-zfs=yes
+EOF
+     else
+	# RedHat based distro
 	cat >>${filename} <<EOF
 SPL_VERSION=\$(dkms status -m spl -k \${kernelver}/\${arch} | awk -F', ' '{print \$2; exit 0}' | sed 's/: added\$//')
 ZFS_VERSION=\$(dkms status -m zfs -k \${kernelver}/\${arch} | awk -F', ' '{print \$2; exit 0}' | sed 's/: added\$//')
 EOF
+	ZFS_CFG=<<EOF
+  --with-spl=\${source_tree}/spl-\${SPL_VERSION}
+  --with-spl-obj=\${dkms_tree}/spl/\${SPL_VERSION}/\${kernelver}/\${arch}
+  --with-zfs=\${source_tree}/zfs-\${ZFS_VERSION}
+  --with-zfs-obj=\${dkms_tree}/zfs/\${ZFS_VERSION}/\${kernelver}/\${arch}
+EOF
+    fi
 fi
 cat >>${filename} <<EOF
 # allow to re-evaluate krb5-devel presence during dkms re-adds and to re-create dkms.conf
@@ -52,12 +78,9 @@ if [ $pkgname = "lustre-client" ] ; then
   --disable-server
 EOF
 else
+	# server package
 	cat >>${filename} <<EOF
-  --enable-server
-  --with-spl=\${source_tree}/spl-\${SPL_VERSION}
-  --with-spl-obj=\${dkms_tree}/spl/\${SPL_VERSION}/\${kernelver}/\${arch}
-  --with-zfs=\${source_tree}/zfs-\${ZFS_VERSION}
-  --with-zfs-obj=\${dkms_tree}/zfs/\${ZFS_VERSION}/\${kernelver}/\${arch}
+  --enable-server${ZFS_CFG}
   --disable-ldiskfs
 EOF
 fi

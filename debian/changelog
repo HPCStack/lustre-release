@@ -1,3 +1,9 @@
+lustre (2.7.63-4) wily; urgency=low
+
+  * Fix build of lustre packages
+
+ -- Yuriy Shestakov (hpcstack) <yshestakov@gmail.com>  Thu, 10 Dec 2015 17:55:00 +0200
+
 lustre (2.7.50-1) unstable; urgency=low
 
   * Automated changelog entry update

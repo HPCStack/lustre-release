@@ -491,7 +491,7 @@ AC_ARG_ENABLE([server],
 # before running, so until LB_CONFIG_MODULES can be reorganized, we
 # call it here.
 LB_CONFIG_MODULES
-AS_IF([test x$enable_modules = xno], [enable_server=no])
+dnl AS_IF([test x$enable_modules = xno], [enable_server=no])
 LB_CONFIG_LDISKFS
 LB_CONFIG_ZFS
 

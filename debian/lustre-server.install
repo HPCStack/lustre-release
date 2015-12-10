@@ -1,0 +1,8 @@
+debian/tmp/usr/sbin/tunefs.lustre		usr/sbin
+debian/tmp/usr/sbin/llverdev		usr/sbin
+debian/tmp/usr/sbin/lr_reader		usr/sbin
+debian/tmp/usr/sbin/ll_recover_lost_found_objs	usr/sbin
+debian/tmp/usr/sbin/ll_decode_filter_fid		usr/sbin
+debian/tmp/usr/sbin/llog_reader			usr/sbin
+debian/tmp/usr/sbin/mkfs.lustre		usr/sbin
+debian/tmp/usr/lib/lustre/mount_osd_*.so usr/lib/lustre/

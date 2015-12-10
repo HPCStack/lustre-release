@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: Brian J. Murrell <brian.murrell@intel.com>
 Uploaders: Brian J. Murrell <brian.murrell@intel.com>
 Standards-Version: 3.8.3
-Build-Depends: module-assistant, libreadline-dev, debhelper (>=7.0.0), dpatch, automake (>=1.7) | automake1.7 | automake1.8 | automake1.9, libsnmp-dev, bzip2, quilt, linux-headers-generic | linux-headers, rsync
+Build-Depends: module-assistant, libreadline-dev, debhelper (>=7.0.0), dpatch, automake (>=1.7) | automake1.7 | automake1.8 | automake1.9, libsnmp-dev, bzip2, quilt, linux-headers-generic | linux-headers, rsync, libzfs-dev, libibverbs-dev, libblkid-dev, libkrb5-dev
 Homepage: https://wiki.hpdd.intel.com/
 Vcs-Git: git://git.hpdd.intel.com/fs/lustre-release.git
 
@@ -41,6 +41,19 @@ Description: source for Lustre filesystem client kernel modules
  This package contains the module source. The client kernel modules
  can be built for kernels 2.6.32+ with the use of module-assistant
  or make-kpkg.
+
+Package: lustre-server
+Section: admin
+Architecture: i386 powerpc ppc64el amd64 ia64
+Priority: optional
+Depends: ${shlibs:Depends}, ${misc:Depends}, lustre-utils, lustre-dkms | lustre, zfsutils, libzfs2
+Description: Server side files of the Lustre filesystem
+ Lustre is a scalable, secure, robust, highly-available cluster file system.
+ This release is maintained by Intel Corporation and available from
+ https://wiki.hpdd.intel.com/
+ .
+ This package provides a number of userspace utilities and files for
+ maintaining Lustre server.
 
 Package: lustre-utils
 Section: utils
