@@ -43,23 +43,21 @@ PACKAGE_VERSION="${pkgver}"
 PACKAGE_CONFIG="${pkgcfg}"
 EOF
 if [ $pkgname = "lustre" ] ; then
-     if [ -e /etc/debian_version ] ; then
-	# Debian based distro
-	ZFS_CFG=<<EOF
-  --with-zfs=yes
-EOF
-     else
+     if [ -e /etc/redhat-release ] ; then
 	# RedHat based distro
 	cat >>${filename} <<EOF
 SPL_VERSION=\$(dkms status -m spl -k \${kernelver}/\${arch} | awk -F', ' '{print \$2; exit 0}' | sed 's/: added\$//')
 ZFS_VERSION=\$(dkms status -m zfs -k \${kernelver}/\${arch} | awk -F', ' '{print \$2; exit 0}' | sed 's/: added\$//')
 EOF
-	ZFS_CFG=<<EOF
+	ZFS_CFG="
   --with-spl=\${source_tree}/spl-\${SPL_VERSION}
   --with-spl-obj=\${dkms_tree}/spl/\${SPL_VERSION}/\${kernelver}/\${arch}
   --with-zfs=\${source_tree}/zfs-\${ZFS_VERSION}
-  --with-zfs-obj=\${dkms_tree}/zfs/\${ZFS_VERSION}/\${kernelver}/\${arch}
-EOF
+  --with-zfs-obj=\${dkms_tree}/zfs/\${ZFS_VERSION}/\${kernelver}/\${arch}"
+    else
+	# Debian distro
+	ZFS_CFG="
+  --with-zfs=yes"
     fi
 fi
 cat >>${filename} <<EOF
