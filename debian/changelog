@@ -1,8 +1,9 @@
-lustre (2.7.63-6) trusty; urgency=low
+lustre (2.7.63-8) trusty; urgency=low
 
-  * Added libtool into Build-Depends into debian/control.main
+  * Added libtool, python-docutils into Build-Depends into debian/control.main
+  * Added 'make -f autoMakefile undef.h' into configure-stamp block
 
- -- Yuriy Shestakov (hpcstack) <yshestakov@gmail.com>  Thu, 16 Dec 2015 15:50:00 +0200
+ -- Yuriy Shestakov (hpcstack) <yshestakov@gmail.com>  Thu, 17 Dec 2015 00:12:00 +0200
 
 lustre (2.7.50-1) unstable; urgency=low
 
