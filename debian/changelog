@@ -1,8 +1,8 @@
-lustre (2.7.63-5) wily; urgency=low
+lustre (2.7.63-6) trusty; urgency=low
 
-  * Added libtool into Build-Depends
+  * Added libtool into Build-Depends into debian/control.main
 
- -- Yuriy Shestakov (hpcstack) <yshestakov@gmail.com>  Thu, 16 Dec 2015 15:12:00 +0200
+ -- Yuriy Shestakov (hpcstack) <yshestakov@gmail.com>  Thu, 16 Dec 2015 15:50:00 +0200
 
 lustre (2.7.50-1) unstable; urgency=low
 
